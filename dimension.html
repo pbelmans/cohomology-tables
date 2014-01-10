@@ -27,7 +27,7 @@ function Series(coefficients, precision) {
     for (var i = 0; i < precision; i++)
       coefficients.push(this._coefficients[i] + series._coefficients[i]);
 
-    return new Series(coefficients);
+    return new Series(coefficients, precision);
   }
 
   // get or set a coefficient (TODO is this good practice?)
@@ -68,7 +68,7 @@ function Series(coefficients, precision) {
       coefficients.push(-1.0 * sum / this._coefficients[0]);
     }
 
-    return new Series(coefficients);
+    return new Series(coefficients, this.precision());
   }
 
   // multiply a second power series with the power series
@@ -84,7 +84,7 @@ function Series(coefficients, precision) {
         coefficients[i] += this._coefficients[j] * series._coefficients[i - j];
     }
 
-    return new Series(coefficients);
+    return new Series(coefficients, precision);
   }
 
   // take the nth power of the power series
@@ -97,7 +97,7 @@ function Series(coefficients, precision) {
       for (var i = 1; i < this.precision(); i++)
         coefficients.push(0);
 
-      return new Series(coefficients);
+      return new Series(coefficients, this.precision());
     }
     else {
       return this.invert().power(-n);
@@ -118,12 +118,16 @@ function Series(coefficients, precision) {
     this.changePrecision(precision);
 }
 
-function HilbertSeries(n, m) {
-  H = new Series([1, -1]);
+// compute the Hilbert series for a complete intersection with degrees m in PG(n, k)
+function HilbertSeries(n, m, precision) {
+  if (precision === undefined)
+    precision = Series._defaultPrecision;
+
+  H = new Series([1, -1], precision);
   H = H.invert().power(n + 1);
 
   for (i in m) {
-    factor = new Series([1]);
+    factor = new Series([1], precision);
     factor.coefficient(m[i], -1);
 
     H = H.multiply(factor);
@@ -132,7 +136,46 @@ function HilbertSeries(n, m) {
   return H;
 }
 
-console.log(HilbertSeries(3, [2, 3]));
+
+function h(n, m, q, r) {
+  // computation of N for Serre duality
+  function N(n, m) {
+    return _.reduce(m, function (a, b) { return a + b; }, 0) - n - 1;
+  }
+
+  // global sections
+  if (q == 0) {
+    // zero-dimensional schemes have to circumvent the Hilbert series
+    if (n == m.length)
+      return _.reduce(m, function (a, b) { return a * b; }, 1);
+    
+    // there are global sections
+    if (r >= 0)
+      return HilbertSeries(n, m, r + 1).coefficient(r);
+    // no global sections
+    else
+      return 0;
+  }
+
+  // apply Serre duality
+  else if (q == n - m.length) {
+    return h(n, m, 0, N(n, m) - r);
+  }
+
+  // nothing in the middle terms
+  return 0
+}
+
+n = 1;
+m = [];
+
+for (var r = 7; r > -6; r--) {
+  var line = "";
+  for (var q = -1; q < n - m.length + 2; q++)
+    line += h(n, m, q, r) + " ";
+
+  console.log(line);
+}
 
 </script>
 </head>
