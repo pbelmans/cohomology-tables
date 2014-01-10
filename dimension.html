@@ -25,7 +25,7 @@ function HilbertSeries(n, m, precision) {
   return H;
 }
 
-
+// compute h^q(X, O_X(r))
 function h(n, m, q, r) {
   // computation of N for Serre duality
   function N(n, m) {
@@ -55,9 +55,6 @@ function h(n, m, q, r) {
   return 0
 }
 
-n = 5;
-m = [2, 5, 3];
-
 function drawDimensions(n, m) {
   // we calculate the dimensions
   var data = []
@@ -81,10 +78,13 @@ function drawDimensions(n, m) {
   degrees.sort(function(a, b) { return a - b;});
 
   // we create the table
-  var table = $("<table></table>");
+  var table = $("<table id='dimensionTable'></table>");
 
+  // add the dimensions to the table
   for (var i in twists) {
     var row = $("<tr></tr>");
+    // add a header cell for the twist degree
+    row.append($("<th class='twist'>" + twists[i] + "</th>"));
 
     for (var j in degrees)
       row.append("<td>" + data[twists[i]][degrees[j]] + "</td>");
@@ -92,34 +92,132 @@ function drawDimensions(n, m) {
     table.append(row);
   }
 
-  return table;
+  // add a bottom row with cohomological indices
+  var row = $("<tr></tr>");
+  row.append("<td></td>");
+  for (var j in degrees)
+    row.append("<th class='degree'>" + degrees[j] + "</th>");
+  table.append(row);
 
+  return table;
+}
+
+function updateTable() {
+  n = parseInt($("input#dimensionRange")[0].value);
+  p = parseInt($("input#equationsRange")[0].value);
+  m = []
+  for (var i = 1; i <= p; i++)
+    m.push(parseInt($("input#degree-" + i + "-range")[0].value));
+
+  $("#dimensionTable").remove();
+  $("body").append(drawDimensions(n, m));
 }
 
 $(document).ready(function() {
-  $("body").append(drawDimensions(n, m));
+  // add the range inputs for degrees
+  for (var i = 1; i <= 10; i++) {
+    $("fieldset").append("<label class='degree-" + i + "' for='degree-" + i + "-range'>degree:</label>");
+    $("fieldset").append("<input class='degree-" + i + "' id='degree-" + i + "-range' type='range' min='1' value='2' max='10' step='1' onchange='changeDegree(\"" + i + "\", value)' list='degree-" + i + "-options'>");
+
+    datalist = $("<datalist id='degree-" + i + "-options'>");
+    for (var j = 1; j <= 10; j++)
+      datalist.append("<option>" + j + "</option>");
+    $("fieldset").append(datalist);
+
+    $("fieldset").append("<output class='degree-" + i + "' for='degree-" + i + "-range' id='degree-" + i + "'>2</output>");
+
+    $("fieldset").append("<br class='degree-" + i + "' style='clear: both'>");
+  }
+
+  // some default values
+  changeDimension(3);
+  changeEquations(1);
 });
+
+function changeDimension(value) {
+  // update the text field
+  $("output#dimension")[0].value = value;
+
+  // the number of equations is bounded by the dimension
+  $("input#equationsRange")[0].max = value;
+
+  // weird way of updating the slider
+  var temporary = $("input#equationsRange")[0].value;
+  $("input#equationsRange")[0].value = 0;
+  $("input#equationsRange")[0].value = temporary;
+
+  // change the number of equations according to the new dimension
+  if (value < $("input#equationsRange")[0].value)
+    changeEquations(value);
+  else
+    changeEquations($("input#equationsRange")[0].value);
+
+}
+
+function changeEquations(value) {
+  // update the text field
+  document.querySelector("#equations").value = value;
+
+  // show and hide range inputs for degrees according to the number of equations
+  for (var i = 1; i <= parseInt(value); i++)
+    $(".degree-" + i).show();
+  for (var i = parseInt(value) + 1; i <= 10; i++)
+    $(".degree-" + i).hide();
+}
+
+function changeDegree(degree, value) {
+  // update the text field
+  document.querySelector("output#degree-" + degree).value = value;
+}
 
 </script>
 
-<style type="text/css">
-td {
-  text-align: center;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="style.css">
+
 </head>
 
 <body>
 <form>
-  <label>dimension:</label><input type="range" min="1" max="10" step="1"><br>
-  <label>number of equations:</label><input type="range" min="1" max="10" step="1"> <!-- TODO should change according to dimension -->
+  <label for="dimensionRange">dimension:</label>
+  <input id="dimensionRange" type="range" value="3" min="1" max="10" step="1" onchange="changeDimension(value)" list="dimensionOptions">
+  <datalist id="dimensionOptions">
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+    <option>5</option>
+    <option>6</option>
+    <option>7</option>
+    <option>8</option>
+    <option>9</option>
+    <option>10</option>
+  </datalist>
+  <output for="dimensionRange" id="dimension">3</output>
+  <br style="clear: both">
+
+  <label for="equationsRange">number of equations:</label>
+  <input id="equationsRange" type="range" value="1" min="0" max="3" step="1" onchange="changeEquations(value)" list="equationsOptions">
+  <datalist id="equationsOptions">
+    <option>0</option>
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+    <option>5</option>
+    <option>6</option>
+    <option>7</option>
+    <option>8</option>
+    <option>9</option>
+    <option>10</option>
+  </datalist>
+  <output for="equationsRange" id="equations">1</output>
+  <br style="clear: both">
 
   <fieldset>
     <legend>degrees</legend>
-    <label>degree:</label><input type="range" min="1" max="10" step="1"><br>
-    <label>degree:</label><input type="range" min="1" max="10" step="1"><br>
-    <label>degree:</label><input type="range" min="1" max="10" step="1">
   </fieldset>
+
+  <a href="javascript:updateTable()">update table</button>
 </form>
 </body>
 </html>
