@@ -9,13 +9,14 @@
  *
  * nothing but a wrapper around an array of numbers
  */
-function Series(coefficients) {
+function Series(coefficients, precision) {
   if (coefficients.length == 0)
     console.log("You must specify at least the constant coefficient");
   if (_.filter(coefficients, function(c) { return typeof(c) != "number"; }).length != 0)
     console.log("You must only specify numbers");
 
-  this._coefficients = coefficients;
+  // constants
+  this._defaultPrecision = 10;
 
   // add a second power series to the power series
   this.add = function(series) {
@@ -27,6 +28,16 @@ function Series(coefficients) {
       coefficients.push(this._coefficients[i] + series._coefficients[i]);
 
     return new Series(coefficients);
+  }
+
+  // get or set a coefficient (TODO is this good practice?)
+  this.coefficient = function(index, coefficient) {
+    if (coefficient === undefined)
+      return this._coefficients[index]
+    else {
+      this._coefficients[index] = coefficient;
+      return this;
+    }
   }
 
   // change the precision of the power series
@@ -97,7 +108,31 @@ function Series(coefficients) {
   this.precision = function() {
     return this._coefficients.length;
   }
+
+  // constructor code
+  this._coefficients = coefficients;
+
+  if (precision === undefined)
+    this.changePrecision(this._defaultPrecision);
+  else
+    this.changePrecision(precision);
 }
+
+function HilbertSeries(n, m) {
+  H = new Series([1, -1]);
+  H = H.invert().power(n + 1);
+
+  for (i in m) {
+    factor = new Series([1]);
+    factor.coefficient(m[i], -1);
+
+    H = H.multiply(factor);
+  }
+
+  return H;
+}
+
+console.log(HilbertSeries(3, [2, 3]));
 
 </script>
 </head>
