@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 <script type="text/javascript">
 
@@ -63,8 +64,10 @@ function Series(coefficients, precision) {
     coefficients.push(1 / this._coefficients[0]);
 
     for (var i = 1; i < this.precision(); i++) {
-      var terms = _.map(_.zip(coefficients.slice(0, i), this._coefficients.slice(1, i + 1).reverse()), function (a) { return a[0] * a[1]; });
+      var pairs = _.zip(coefficients.slice(0, i), this._coefficients.slice(1, i + 1).reverse());
+      var terms = _.map(pairs, function (a) { return a[0] * a[1]; });
       var sum = _.reduce(terms, function(c, d) { return c + d; }, 0);
+
       coefficients.push(-1.0 * sum / this._coefficients[0]);
     }
 
@@ -166,20 +169,71 @@ function h(n, m, q, r) {
   return 0
 }
 
-n = 1;
-m = [];
+n = 7;
+m = [3, 6, 9];
 
-for (var r = 7; r > -6; r--) {
-  var line = "";
-  for (var q = -1; q < n - m.length + 2; q++)
-    line += h(n, m, q, r) + " ";
+function drawDimensions(n, m) {
+  // we calculate the dimensions
+  var data = []
 
-  console.log(line);
+  for (var r = 7; r > -6; r--) {
+    data[r] = [];
+
+    for (var q = -1; q < n - m.length + 2; q++)
+      data[r][q] = h(n, m, q, r);
+  }
+
+  // we collect the twisting indices to sort them
+  var twists = []
+  for (var r in data) twists.push(parseInt(r));
+  twists.sort(function(a, b) { return a - b; });
+  twists.reverse();
+
+  // we collect the cohomological indices to sort them
+  var degrees = []
+  for (var q in data[0]) degrees.push(parseInt(q));
+  degrees.sort(function(a, b) { return a - b;});
+
+  // we create the table
+  var table = $("<table></table>");
+
+  for (var i in twists) {
+    var row = $("<tr></tr>");
+
+    for (var j in degrees)
+      row.append("<td>" + data[twists[i]][degrees[j]] + "</td>");
+
+    table.append(row);
+  }
+
+  return table;
+
 }
 
+$(document).ready(function() {
+  $("body").append(drawDimensions(n, m));
+});
+
 </script>
+
+<style type="text/css">
+td {
+  text-align: center;
+}
+</style>
 </head>
 
 <body>
+<form>
+  <label>dimension:</label><input type="range" min="1" max="10" step="1"><br>
+  <label>number of equations:</label><input type="range" min="1" max="10" step="1"> <!-- TODO should change according to dimension -->
+
+  <fieldset>
+    <legend>degrees</legend>
+    <label>degree:</label><input type="range" min="1" max="10" step="1"><br>
+    <label>degree:</label><input type="range" min="1" max="10" step="1"><br>
+    <label>degree:</label><input type="range" min="1" max="10" step="1">
+  </fieldset>
+</form>
 </body>
 </html>
