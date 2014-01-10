@@ -1,0 +1,32 @@
+form {
+  margin: 0 auto;
+  width: 300px;
+}
+
+label {
+  float: left;
+  width: 150px;
+  display: block;
+}
+
+fieldset {
+  text-align: center;
+}
+
+fieldset label {
+  width: 70px;
+}
+
+input {
+  display: block;
+  float: left;
+}
+
+table {
+  margin: 0 auto;
+}
+
+td, th {
+  padding: .2em .6em;
+  text-align: center;
+}
