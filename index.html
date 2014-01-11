@@ -3,59 +3,13 @@
 <head>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+
 <script type="text/javascript" src="general.js"></script>
-<script type="text/javascript" src="hilbert.js"></script>
 <script type="text/javascript" src="series.js"></script>
+<script type="text/javascript" src="hilbertPolynomial.js"></script>
+<script type="text/javascript" src="hilbertSeries.js"></script>
 
 <script type="text/javascript">
-
-// compute the Hilbert series for a complete intersection with degrees m in PG(n, k)
-function HilbertSeries(n, m, precision) {
-  if (precision === undefined)
-    precision = Series._defaultPrecision;
-
-  H = new Series([1, -1], precision);
-  H = H.invert().power(n + 1);
-
-  for (i in m) {
-    factor = new Series([1], precision);
-    factor.coefficient(m[i], -1);
-
-    H = H.multiply(factor);
-  }
-
-  return H;
-}
-
-// compute h^q(X, O_X(r))
-function h(n, m, q, r) {
-  // computation of N for Serre duality
-  function N(n, m) {
-    return _.reduce(m, function (a, b) { return a + b; }, 0) - n - 1;
-  }
-
-  // global sections
-  if (q == 0) {
-    // zero-dimensional schemes have to circumvent the Hilbert series
-    if (n == m.length)
-      return _.reduce(m, function (a, b) { return a * b; }, 1);
-    
-    // there are global sections
-    if (r >= 0)
-      return HilbertSeries(n, m, r + 1).coefficient(r);
-    // no global sections
-    else
-      return 0;
-  }
-
-  // apply Serre duality
-  else if (q == n - m.length) {
-    return h(n, m, 0, N(n, m) - r);
-  }
-
-  // nothing in the middle terms
-  return 0
-}
 
 function drawDimensions(n, m) {
   // we calculate the dimensions
@@ -104,6 +58,46 @@ function drawDimensions(n, m) {
   return table;
 }
 
+function drawHodgeDiamond(n, m) {
+  // dimension of the resulting space
+  d = n - m.length;
+
+  // we create the table
+  var table = $("<table id='hodgeDiamond'></table>");
+
+  // we iterate over k = p + q
+  // this is the upper half of the diamond
+  for (var k = 0; k <= d; k++) {
+    var row = $("<tr></tr>");
+
+    // create some empty cells
+    for (var i = 0; i < d - k; i++)
+      row.append("<td></td>");
+
+    // add the integers to the table
+    for (var q = 0; q <= k; q++)
+      row.append("<td>" + HodgeDiamond(n, m, k - q, q) + "</td><td></td>"); // empty cell at the end for alternation
+
+    table.append(row);
+  }
+  // this is the lower half of the diamond
+  for (var k = d + 1; k <= 2 * d; k++) {
+    var row = $("<tr></tr>");
+
+    // create some empty cells
+    for (var i = 0; i < k - d; i++)
+      row.append("<td></td>");
+
+    // add the integers to the table
+    for (var q = k - d; q <= d; q++)
+      row.append("<td>" + HodgeDiamond(n, m, k - q, q) + "</td><td></td>"); // empty cell at the end for alternation
+
+    table.append(row);
+  }
+
+  return table;
+}
+
 function updateTable() {
   n = parseInt($("input#dimensionRange")[0].value);
   p = parseInt($("input#equationsRange")[0].value);
@@ -111,10 +105,11 @@ function updateTable() {
   for (var i = 1; i <= p; i++)
     m.push(parseInt($("input#degree-" + i + "-range")[0].value));
 
-  $("#dimensionTable").remove();
+  $("table#dimensionTable").remove();
   $("body").append(drawDimensions(n, m));
 
-  HodgeDiamond(n, m, 0, 0);
+  $("table#hodgeDiamond").remove();
+  $("body").append(drawHodgeDiamond(n, m));
 }
 
 $(document).ready(function() {
@@ -136,6 +131,11 @@ $(document).ready(function() {
   // some default values
   changeDimension(3);
   changeEquations(1);
+
+  // draw a first table
+  updateTable();
+  // every change will trigger an update
+  $("input").change(updateTable);
 });
 
 function changeDimension(value) {
@@ -155,7 +155,6 @@ function changeDimension(value) {
     changeEquations(value);
   else
     changeEquations($("input#equationsRange")[0].value);
-
 }
 
 function changeEquations(value) {
@@ -220,8 +219,6 @@ function changeDegree(degree, value) {
   <fieldset>
     <legend>degrees</legend>
   </fieldset>
-
-  <a href="javascript:updateTable()">update table</button>
 </form>
 </body>
 </html>

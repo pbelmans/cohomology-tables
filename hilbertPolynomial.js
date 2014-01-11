@@ -1,5 +1,5 @@
 /**
- * a Hilbert polynomial object
+ * A Hilbert polynomial object
  */
 function HilbertPolynomial(length) {
   // get or set a coefficient (TODO is this good practice?)
@@ -71,6 +71,7 @@ function HilbertPolynomial(length) {
     return result;
   }
 
+  // constructor code
   this._length = 0;
   if (length !== undefined)
     this._length = length;
@@ -96,7 +97,7 @@ function EulerCharacteristic(H, n) {
 }
 
 // compute the number in the Hodge diamond of a complete intersection of degrees m in PG(n, k)
-function HodgeDiamond(n, m, p, q) {
+function middleLine(n, m) {
   // dimension of the complete intersection
   d = n - m.length;
 
@@ -129,10 +130,23 @@ function HodgeDiamond(n, m, p, q) {
   }
 
   // Lefschetz hyperplane theorem
-  middleLine = new Array(d + 1);
+  line = new Array(d + 1);
 
   for (var p = 0; p <= d; p++)
-    middleLine[p] = sign(d - p) * EulerCharacteristic(differentialForms[p], n) - (2 * p == d ? 0 : sign(d));
+    line[p] = sign(d - p) * EulerCharacteristic(differentialForms[p], n) - (2 * p == d ? 0 : sign(d));
 
-  console.log(middleLine);
+  return line;
+}
+
+// compute the (p,q)-entry of the Hodge diamond of the complete intersection of degrees m in PG(n, k)
+function HodgeDiamond(n, m, p, q) {
+  // dimension of the resulting variety
+  d = n - m.length;
+
+  if (p + q == d)
+    return middleLine(n, m)[p];
+  else if (p == q)
+    return 1;
+  else
+    return 0;
 }

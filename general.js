@@ -20,6 +20,7 @@ function choose(a, b) {
   return Math.round(result);
 }
 
+// compute (-1)^n
 function sign(n) {
   return (n % 2 == 0 ? 1 : -1);
 }

@@ -1,7 +1,7 @@
 /**
- * a power series object
+ * A power series object
  *
- * nothing but a wrapper around an array of numbers
+ * This is nothing but a wrapper around an array of numbers
  */
 function Series(coefficients, precision) {
   if (coefficients.length == 0)
