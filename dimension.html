@@ -3,6 +3,8 @@
 <head>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+<script type="text/javascript" src="general.js"></script>
+<script type="text/javascript" src="hilbert.js"></script>
 <script type="text/javascript" src="series.js"></script>
 
 <script type="text/javascript">
@@ -111,6 +113,8 @@ function updateTable() {
 
   $("#dimensionTable").remove();
   $("body").append(drawDimensions(n, m));
+
+  HodgeDiamond(n, m, 0, 0);
 }
 
 $(document).ready(function() {
