@@ -4,6 +4,11 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+
 <script type="text/javascript" src="general.js"></script>
 <script type="text/javascript" src="series.js"></script>
 <script type="text/javascript" src="hilbertPolynomial.js"></script>
@@ -13,9 +18,9 @@
 
 function drawDimensions(n, m) {
   // we calculate the dimensions
-  var data = []
+  var data = [];
 
-  for (var r = 7; r > -6; r--) {
+  for (var r = $("input#maximum").val(); r > -$("input#maximum").val() + 1; r--) {
     data[r] = [];
 
     for (var q = -1; q < n - m.length + 2; q++)
@@ -106,10 +111,10 @@ function updateTable() {
     m.push(parseInt($("input#degree-" + i + "-range")[0].value));
 
   $("table#dimensionTable").remove();
-  $("body").append(drawDimensions(n, m));
+  $("h2#dimensions + form").after(drawDimensions(n, m));
 
   $("table#hodgeDiamond").remove();
-  $("body").append(drawHodgeDiamond(n, m));
+  $("h2#hodge").after(drawHodgeDiamond(n, m));
 }
 
 $(document).ready(function() {
@@ -220,5 +225,21 @@ function changeDegree(degree, value) {
     <legend>degrees</legend>
   </fieldset>
 </form>
+
+<p>This little tool computes
+<ul>
+  <li>the dimensions of the cohomology spaces $\mathrm{H}^i(X,\mathcal{O}_X(r))$
+  <li>the Hodge diamond
+</ul>
+<p>of a complete intersection $X$.
+
+<h2 id="dimensions">$\mathrm{h}^i(X,\mathcal{O}_X(r))$</h2>
+<form>
+  <label for="maximum" style="width: 200px">How high should it twist?</label>
+  <input type="number" min="1" step="1" value="7" id="maximum" name="maximum">
+  <br style="clear: both">
+</form>
+
+<h2 id="hodge">The Hodge diamond of $X$</h2>
 </body>
 </html>

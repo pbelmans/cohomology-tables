@@ -1,6 +1,22 @@
+body {
+  min-width: 500px;
+  border: 1px solid gray;
+  float: left;
+}
+
+h2 {
+  border-top: 1px solid gray;
+  padding: .5em 0 0 .5em;
+  margin: .5em 0 0 0;
+}
+
+p {
+  margin: .5em .5em 0 .5em;
+}
+
 form {
-  margin: 0 auto;
-  width: 300px;
+  padding: .5em .5em 0 .5em;
+  width: 350px;
 }
 
 label {
@@ -20,6 +36,14 @@ fieldset label {
 input {
   display: block;
   float: left;
+}
+
+output {
+  margin-left: 1em;
+}
+
+fieldset output {
+  margin-left: -1em;
 }
 
 table {
