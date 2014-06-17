@@ -1,12 +1,25 @@
 body {
-  min-width: 500px;
+}
+
+div#input,
+div#dimensions-wrapper,
+div#hodge-wrapper {
   border: 1px solid gray;
+  width: 500px;
+  margin: .3em;
+}
+
+div#wrapper,
+div#hodge-wrapper {
   float: left;
 }
 
+div#hodge-wrapper {
+  width: 650px;
+}
+
 h2 {
-  border-top: 1px solid gray;
-  padding: .5em 0 0 .5em;
+  padding: 0 0 0 .5em;
   margin: .5em 0 0 0;
 }
 
@@ -53,4 +66,8 @@ table {
 td, th {
   padding: .2em .6em;
   text-align: center;
+}
+
+div#input form {
+  margin-bottom: .5em;
 }

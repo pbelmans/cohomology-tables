@@ -186,68 +186,76 @@ function changeDegree(degree, value) {
 </head>
 
 <body>
-<form>
-  <label for="dimensionRange">dimension:</label>
-  <input id="dimensionRange" type="range" value="3" min="1" max="10" step="1" onchange="changeDimension(value)" list="dimensionOptions">
-  <datalist id="dimensionOptions">
-    <option>1</option>
-    <option>2</option>
-    <option>3</option>
-    <option>4</option>
-    <option>5</option>
-    <option>6</option>
-    <option>7</option>
-    <option>8</option>
-    <option>9</option>
-    <option>10</option>
-  </datalist>
-  <output for="dimensionRange" id="dimension">3</output>
-  <br style="clear: both">
+<div id="wrapper">
+<div id="input">
+  <p>This little tool computes
+  <ul>
+    <li>the dimensions of the cohomology spaces $\mathrm{H}^i(X,\mathcal{O}_X(r))$
+    <li>the Hodge diamond
+  </ul>
+  <p>of a complete intersection $X$.
 
-  <label for="equationsRange">number of equations:</label>
-  <input id="equationsRange" type="range" value="1" min="0" max="3" step="1" onchange="changeEquations(value)" list="equationsOptions">
-  <datalist id="equationsOptions">
-    <option>0</option>
-    <option>1</option>
-    <option>2</option>
-    <option>3</option>
-    <option>4</option>
-    <option>5</option>
-    <option>6</option>
-    <option>7</option>
-    <option>8</option>
-    <option>9</option>
-    <option>10</option>
-  </datalist>
-  <output for="equationsRange" id="equations">1</output>
-  <br style="clear: both">
+  <form>
+    <label for="dimensionRange">dimension:</label>
+    <input id="dimensionRange" type="range" value="3" min="1" max="10" step="1" onchange="changeDimension(value)" list="dimensionOptions">
+    <datalist id="dimensionOptions">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+      <option>8</option>
+      <option>9</option>
+      <option>10</option>
+    </datalist>
+    <output for="dimensionRange" id="dimension">3</output>
+    <br style="clear: both">
 
-  <fieldset>
-    <legend>degrees of the hypersurfaces</legend>
-  </fieldset>
-</form>
+    <label for="equationsRange">number of equations:</label>
+    <input id="equationsRange" type="range" value="1" min="0" max="3" step="1" onchange="changeEquations(value)" list="equationsOptions">
+    <datalist id="equationsOptions">
+      <option>0</option>
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+      <option>8</option>
+      <option>9</option>
+      <option>10</option>
+    </datalist>
+    <output for="equationsRange" id="equations">1</output>
+    <br style="clear: both">
 
-<p>This little tool computes
-<ul>
-  <li>the dimensions of the cohomology spaces $\mathrm{H}^i(X,\mathcal{O}_X(r))$
-  <li>the Hodge diamond
-</ul>
-<p>of a complete intersection $X$.
+    <fieldset>
+      <legend>degrees of the hypersurfaces</legend>
+    </fieldset>
+  </form>
+</div>
 
-<h2 id="dimensions">$\mathrm{h}^i(X,\mathcal{O}_X(r))$</h2>
-<form>
-  <label for="maximum" style="width: 200px">How high should it twist?</label>
-  <input type="number" min="2" step="1" value="7" id="maximum" name="maximum">
-  <br style="clear: both">
-</form>
+<div id="dimensions-wrapper">
+  <h2 id="dimensions">$\mathrm{h}^i(X,\mathcal{O}_X(r))$</h2>
+  <form>
+    <label for="maximum" style="width: 200px">How high should it twist?</label>
+    <input type="number" min="2" step="1" value="7" id="maximum" name="maximum">
+    <br style="clear: both">
+  </form>
 
-<dl style="margin-left: .5em;">
-  <dt>horizontal
-  <dd>cohomological index
-  <dt>vertical
-  <dd>degree of Serre twist
-</dl>
+  <dl style="margin-left: .5em;">
+    <dt>horizontal
+    <dd>cohomological index
+    <dt>vertical
+    <dd>degree of Serre twist
+  </dl>
+</div>
+</div>
 
-<h2 id="hodge">The Hodge diamond of $X$</h2>
+<div id="hodge-wrapper">
+  <h2 id="hodge">The Hodge diamond of $X$</h2>
+</div>
 </body>
 </html>
