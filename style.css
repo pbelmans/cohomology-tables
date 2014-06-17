@@ -5,7 +5,7 @@ div#input,
 div#dimensions-wrapper,
 div#hodge-wrapper {
   border: 1px solid gray;
-  width: 500px;
+  min-width: 400px;
   margin: .3em;
 }
 
@@ -14,17 +14,18 @@ div#hodge-wrapper {
   float: left;
 }
 
-div#hodge-wrapper {
-  width: 650px;
-}
-
 h2 {
   padding: 0 0 0 .5em;
   margin: .5em 0 0 0;
 }
 
+h3 {
+  padding: 0 0 0 .5em;
+  margin: .2em 0 0 0;
+}
+
 p {
-  margin: .5em .5em 0 .5em;
+  margin: .5em .5em .5em .5em;
 }
 
 form {
@@ -66,6 +67,10 @@ table {
 td, th {
   padding: .2em .6em;
   text-align: center;
+}
+
+ul {
+  margin: 0 .5em;
 }
 
 div#input form {

@@ -104,6 +104,25 @@ function drawHodgeDiamond(n, m) {
   return table;
 }
 
+function determineInvariants(n, m) {
+  var invariants = $("<div id='invariants'></div>");
+
+  invariants.append("<h3>Betti numbers</h3>");
+  invariants.append("<p>$\\mathrm{b}_0=1$");
+  invariants.append("<p>$\\mathrm{b}_1=\\mathrm{h}^{1,0}+\\mathrm{h}^{0,1}=0$");
+  invariants.append("<p>$\\mathrm{b}_2=\\mathrm{h}^{2,0}+\\mathrm{h}^{1,1}+\\mathrm{h}^{0,2}=" + (2 * HodgeDiamond(n, m, 2, 0) + HodgeDiamond(n, m, 1, 1)) + "$");
+  invariants.append("<p>$\\mathrm{b}_3=\\mathrm{h}^{2,1}+\\mathrm{h}^{1,2}=0$");
+  invariants.append("<p>$\\mathrm{b}_4=1$");
+
+  invariants.append("<h3>Other invariants</h3>");
+  invariants.append("<p>$\\mathrm{e}=\\sum_{i=0}^4(-1)^i\\mathrm{b}_i=" + (2 + 2 * HodgeDiamond(n, m, 2, 0) + HodgeDiamond(n, m, 1, 1)) + "$");
+  invariants.append("<p>$\\mathrm{q}=0$");
+  invariants.append("<p>$\\mathrm{p}_{\\mathrm{g}}=\\mathrm{h}^{0,2}=\\mathrm{h}^{2,0}=" + HodgeDiamond(n, m, 2, 0) + "$");
+  invariants.append("<p>$\\mathrm{p}_{\\mathrm{a}}=\\mathrm{h}^{0,2}-\\mathrm{h}^{0,1}=" + HodgeDiamond(n, m, 2, 0) + "$");
+
+  return invariants;
+}
+
 function updateTable() {
   n = parseInt($("input#dimensionRange")[0].value);
   p = parseInt($("input#equationsRange")[0].value);
@@ -116,6 +135,12 @@ function updateTable() {
 
   $("table#hodgeDiamond").remove();
   $("h2#hodge").after(drawHodgeDiamond(n, m));
+
+  $("div#invariants").remove();
+  if (n - p == 2) {
+    $("table#hodgeDiamond").after(determineInvariants(n, m));
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+  }
 }
 
 $(document).ready(function() {
