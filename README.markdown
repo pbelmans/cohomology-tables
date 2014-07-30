@@ -1,0 +1,1 @@
+For posterity reasons I should mention http://www.math.purdue.edu/~dvb/preprints/book-chap17.pdf which is the best / most readable resource I've seen so far on the subject of Hodge numbers of hypersurfaces. It's probably no coincidence that he also wrote the code on which I based my implementation.
