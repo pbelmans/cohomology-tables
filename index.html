@@ -26,6 +26,8 @@
 <script type="text/javascript" src="series.js"></script>
 <script type="text/javascript" src="hilbertPolynomial.js"></script>
 <script type="text/javascript" src="hilbertSeries.js"></script>
+<script type="text/javascript" src="twistedHodge.js"></script>
+<script type="text/javascript" src="hodgeTables.js"></script>
 
 <script type="text/javascript">
 
@@ -76,81 +78,70 @@ function drawDimensions(n, m) {
   return table;
 }
 
-function drawHodgeDiamond(n, m) {
-  // dimension of the resulting space
-  d = n - m.length;
-
-  // we create the table
-  var table = $("<table id='hodgeDiamond'></table>");
-
-  // we iterate over k = p + q
-  // this is the upper half of the diamond
-  for (var k = 0; k <= d; k++) {
-    var row = $("<tr></tr>");
-
-    // create some empty cells
-    for (var i = 0; i < d - k; i++)
-      row.append("<td></td>");
-
-    // add the integers to the table
-    for (var q = 0; q <= k; q++)
-      row.append("<td>" + HodgeDiamond(n, m, k - q, q) + "</td><td></td>"); // empty cell at the end for alternation
-
-    table.append(row);
-  }
-  // this is the lower half of the diamond
-  for (var k = d + 1; k <= 2 * d; k++) {
-    var row = $("<tr></tr>");
-
-    // create some empty cells
-    for (var i = 0; i < k - d; i++)
-      row.append("<td></td>");
-
-    // add the integers to the table
-    for (var q = k - d; q <= d; q++)
-      row.append("<td>" + HodgeDiamond(n, m, k - q, q) + "</td><td></td>"); // empty cell at the end for alternation
-
-    table.append(row);
-  }
-
-  return table;
-}
-
-function determineInvariants(n, m) {
+function determineInvariants(cohomology) {
   var invariants = $("<div id='invariants'></div>");
+  var geometricGenus = cohomology.hodge(0n, 2, 0);
+  var middle = cohomology.hodge(0n, 1, 1);
 
   invariants.append("<h3>Betti numbers</h3>");
   invariants.append("<p>$\\mathrm{b}_0=1$");
   invariants.append("<p>$\\mathrm{b}_1=\\mathrm{h}^{1,0}+\\mathrm{h}^{0,1}=0$");
-  invariants.append("<p>$\\mathrm{b}_2=\\mathrm{h}^{2,0}+\\mathrm{h}^{1,1}+\\mathrm{h}^{0,2}=" + (2 * HodgeDiamond(n, m, 2, 0) + HodgeDiamond(n, m, 1, 1)) + "$");
+  invariants.append("<p>$\\mathrm{b}_2=\\mathrm{h}^{2,0}+\\mathrm{h}^{1,1}+\\mathrm{h}^{0,2}=" + (2n * geometricGenus + middle) + "$");
   invariants.append("<p>$\\mathrm{b}_3=\\mathrm{h}^{2,1}+\\mathrm{h}^{1,2}=0$");
   invariants.append("<p>$\\mathrm{b}_4=1$");
 
   invariants.append("<h3>Other invariants</h3>");
-  invariants.append("<p>$\\mathrm{e}=\\sum_{i=0}^4(-1)^i\\mathrm{b}_i=" + (2 + 2 * HodgeDiamond(n, m, 2, 0) + HodgeDiamond(n, m, 1, 1)) + "$");
+  invariants.append("<p>$\\mathrm{e}=\\sum_{i=0}^4(-1)^i\\mathrm{b}_i=" + (2n + 2n * geometricGenus + middle) + "$");
   invariants.append("<p>$\\mathrm{q}=0$");
-  invariants.append("<p>$\\mathrm{p}_{\\mathrm{g}}=\\mathrm{h}^{0,2}=\\mathrm{h}^{2,0}=" + HodgeDiamond(n, m, 2, 0) + "$");
-  invariants.append("<p>$\\mathrm{p}_{\\mathrm{a}}=\\mathrm{h}^{0,2}-\\mathrm{h}^{0,1}=" + HodgeDiamond(n, m, 2, 0) + "$");
+  invariants.append("<p>$\\mathrm{p}_{\\mathrm{g}}=\\mathrm{h}^{0,2}=\\mathrm{h}^{2,0}=" + geometricGenus + "$");
+  invariants.append("<p>$\\mathrm{p}_{\\mathrm{a}}=\\mathrm{h}^{0,2}-\\mathrm{h}^{0,1}=" + geometricGenus + "$");
 
   return invariants;
 }
 
+var currentIntersection;
+var currentCohomology;
+
+function updateDimensions() {
+  var maximum = document.querySelector("#maximum");
+  if (!maximum.validity.valid || maximum.value === "") return;
+  $("table#dimensionTable").remove();
+  $("h2#dimensions + form").after(drawDimensions(currentIntersection.n, currentIntersection.m));
+}
+
+function updateTwistedHodgeDiamond() {
+  var input = document.querySelector("#hodgeTwist");
+  input.setCustomValidity("");
+  if (!input.validity.valid || !/^[+-]?\d+$/.test(input.value)) {
+    input.setCustomValidity("Enter an integer twist (positive, zero, or negative).");
+    $("#twistedHodgeDiamond").remove();
+    return;
+  }
+  $("#twistedHodgeDiamond").remove();
+  $("#twisted-hodge-controls").after(drawHodgeDiamond(currentCohomology, BigInt(input.value), "twistedHodgeDiamond"));
+}
+
 function updateTable() {
-  n = parseInt($("input#dimensionRange")[0].value);
-  p = parseInt($("input#equationsRange")[0].value);
-  m = []
+  var n = parseInt($("input#dimensionRange")[0].value);
+  var p = parseInt($("input#equationsRange")[0].value);
+  var m = [];
   for (var i = 1; i <= p; i++)
     m.push(parseInt($("input#degree-" + i + "-range")[0].value));
 
-  $("table#dimensionTable").remove();
-  $("h2#dimensions + form").after(drawDimensions(n, m));
+  currentIntersection = { n: n, m: m };
+  currentCohomology = new TwistedHodgeCohomology(n, m);
+  updateDimensions();
 
   $("table#hodgeDiamond").remove();
-  $("h2#hodge").after(drawHodgeDiamond(n, m));
+  $("h2#hodge").after(drawHodgeDiamond(currentCohomology, 0n, "hodgeDiamond"));
+
+  $("table#polyvectorParallelogram").remove();
+  $("h2#polyvector").after(drawPolyvectorParallelogram(currentCohomology));
+  updateTwistedHodgeDiamond();
 
   $("div#invariants").remove();
   if (n - p == 2) {
-    $("table#hodgeDiamond").after(determineInvariants(n, m));
+    $("table#hodgeDiamond").after(determineInvariants(currentCohomology));
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
   }
 }
@@ -177,27 +168,23 @@ $(document).ready(function() {
 
   // draw a first table
   updateTable();
-  // every change will trigger an update
-  $("input").change(updateTable);
+  // Only a change to X needs to rebuild all the tables.
+  $("#input input").change(updateTable);
+  $("#maximum").on("input change", updateDimensions);
+  $("#hodgeTwist").on("input change", updateTwistedHodgeDiamond);
+  $("form").submit(function(event) { event.preventDefault(); });
 });
 
 function changeDimension(value) {
   // update the text field
   $("output#dimension")[0].value = value;
 
-  // the number of equations is bounded by the dimension
-  $("input#equationsRange")[0].max = value;
-
-  // weird way of updating the slider
-  var temporary = $("input#equationsRange")[0].value;
-  $("input#equationsRange")[0].value = 0;
-  $("input#equationsRange")[0].value = temporary;
-
-  // change the number of equations according to the new dimension
-  if (value < $("input#equationsRange")[0].value)
-    changeEquations(value);
-  else
-    changeEquations($("input#equationsRange")[0].value);
+  // Preserve the count before changing the range, which can sanitize its value.
+  var equations = document.querySelector("#equationsRange");
+  var count = Number(equations.value);
+  equations.max = value;
+  equations.value = Math.min(count, Number(value));
+  changeEquations(equations.value);
 }
 
 function changeEquations(value) {
@@ -229,6 +216,8 @@ function changeDegree(degree, value) {
   <ul>
     <li>the dimensions of the cohomology spaces $\mathrm{H}^i(X,\mathcal{O}_X(r))$
     <li>the Hodge diamond
+    <li>the polyvector parallelogram
+    <li>the twisted Hodge diamond
   </ul>
   <p>of a complete intersection $X$.
 
@@ -293,6 +282,19 @@ function changeDegree(degree, value) {
 
 <div id="hodge-wrapper">
   <h2 id="hodge">The Hodge diamond of $X$</h2>
+</div>
+
+<div id="polyvector-wrapper">
+  <h2 id="polyvector">The polyvector parallelogram of $X$</h2>
+</div>
+
+<div id="twisted-hodge-wrapper">
+  <h2 id="twisted-hodge">The twisted Hodge diamond of $X$</h2>
+  <form id="twisted-hodge-controls">
+    <label for="hodgeTwist" style="width: 200px">How much should it twist?</label>
+    <input type="number" step="1" value="0" id="hodgeTwist" name="hodgeTwist" required>
+    <br style="clear: both">
+  </form>
 </div>
 </body>
 </html>

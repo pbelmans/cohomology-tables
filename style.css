@@ -3,14 +3,18 @@ body {
 
 div#input,
 div#dimensions-wrapper,
-div#hodge-wrapper {
+div#hodge-wrapper,
+div#polyvector-wrapper,
+div#twisted-hodge-wrapper {
   border: 1px solid gray;
   min-width: 400px;
   margin: .3em;
 }
 
 div#wrapper,
-div#hodge-wrapper {
+div#hodge-wrapper,
+div#polyvector-wrapper,
+div#twisted-hodge-wrapper {
   float: left;
 }
 
