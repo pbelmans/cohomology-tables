@@ -2,6 +2,11 @@
 <html>
 <head>
 <title>Cohomology tables for complete intersections</title>
+<script>
+  // Keep assets rooted at the application when a configuration URL is opened directly.
+  var appBasePath = /^\/cohomology-tables(?:\/|$)/.test(location.pathname) ? "/cohomology-tables/" : "/";
+  document.write('<base href="' + appBasePath + '">');
+</script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 
@@ -102,6 +107,68 @@ function determineInvariants(cohomology) {
 var currentIntersection;
 var currentCohomology;
 
+var defaultMaximum = 7;
+var defaultHodgeTwist = "0";
+
+function readURLState() {
+  var route = new URLSearchParams(location.search).get("route");
+  var routeURL = route === null ? location : new URL(route, location.origin);
+  var segments = routeURL.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+  if (segments[0] === "cohomology-tables") segments.shift();
+
+  var state = { n: 3, m: [2], maximum: defaultMaximum, hodgeTwist: defaultHodgeTwist };
+  if (segments.length === 0) return state;
+
+  var n = Number(segments[0]);
+  var degrees = segments.length > 1 && segments[1] !== "" ? segments[1].split("-").map(Number) : [];
+  if (segments.length > 2 || !Number.isInteger(n) || n < 1 || n > 10 || degrees.length > n ||
+      degrees.some(function(degree) { return !Number.isInteger(degree) || degree < 1 || degree > 10; }))
+    return state;
+
+  state.n = n;
+  state.m = degrees;
+  var twists = new URLSearchParams(routeURL.search).get("twist");
+  if (twists !== null) {
+    // A leading minus belongs to the Hodge twist: twist=6--2 means 6 and -2.
+    var match = twists.match(/^(\d+)-([+-]?\d+)$/);
+    if (match && Number.isInteger(Number(match[1])) && Number(match[1]) >= 2 &&
+        Number.isSafeInteger(Number(match[1]))) {
+      state.maximum = Number(match[1]);
+      state.hodgeTwist = match[2];
+    }
+  }
+  return state;
+}
+
+function writeURLState() {
+  var prefix = appBasePath;
+  var path = prefix + currentIntersection.n;
+  if (currentIntersection.m.length) path += "/" + currentIntersection.m.join("-");
+
+  var maximum = Number(document.querySelector("#maximum").value);
+  var hodgeTwist = document.querySelector("#hodgeTwist").value;
+  if (!document.querySelector("#maximum").validity.valid ||
+      !document.querySelector("#hodgeTwist").validity.valid || !/^[+-]?\d+$/.test(hodgeTwist))
+    return;
+  var query = maximum !== defaultMaximum || hodgeTwist !== defaultHodgeTwist ?
+    "?twist=" + maximum + "-" + encodeURIComponent(hodgeTwist) : "";
+  history.replaceState(null, "", path + query);
+}
+
+function applyURLState(state) {
+  $("#dimensionRange").val(state.n);
+  changeDimension(state.n);
+  $("#equationsRange").val(state.m.length);
+  changeEquations(state.m.length);
+  state.m.forEach(function(degree, index) {
+    $("#degree-" + (index + 1) + "-range").val(degree);
+    changeDegree(index + 1, degree);
+  });
+  $("#maximum").val(state.maximum);
+  $("#hodgeTwist").val(state.hodgeTwist);
+  updateTable();
+}
+
 function updateDimensions() {
   var maximum = document.querySelector("#maximum");
   if (!maximum.validity.valid || maximum.value === "") return;
@@ -130,6 +197,7 @@ function updateTable() {
 
   currentIntersection = { n: n, m: m };
   currentCohomology = new TwistedHodgeCohomology(n, m);
+  writeURLState();
   updateDimensions();
 
   $("table#hodgeDiamond").remove();
@@ -162,17 +230,20 @@ $(document).ready(function() {
     $("fieldset").append("<br class='degree-" + i + "' style='clear: both'>");
   }
 
-  // some default values
-  changeDimension(3);
-  changeEquations(1);
-
-  // draw a first table
-  updateTable();
+  // Restore the intersection and twists from the URL, or use the defaults.
+  applyURLState(readURLState());
   // Only a change to X needs to rebuild all the tables.
   $("#input input").change(updateTable);
-  $("#maximum").on("input change", updateDimensions);
-  $("#hodgeTwist").on("input change", updateTwistedHodgeDiamond);
+  $("#maximum").on("input change", function() {
+    updateDimensions();
+    writeURLState();
+  });
+  $("#hodgeTwist").on("input change", function() {
+    updateTwistedHodgeDiamond();
+    writeURLState();
+  });
   $("form").submit(function(event) { event.preventDefault(); });
+  window.addEventListener("popstate", function() { applyURLState(readURLState()); });
 });
 
 function changeDimension(value) {

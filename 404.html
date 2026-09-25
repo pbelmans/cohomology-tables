@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Loading cohomology tables</title>
+<script>
+  var appPath = /^\/cohomology-tables(?:\/|$)/.test(location.pathname) ? "/cohomology-tables/" : "/";
+  var requestedURL = location.pathname + location.search + location.hash;
+  location.replace(appPath + "?route=" + encodeURIComponent(requestedURL));
+</script>
+</head>
+<body>
+<p>Loading the requested cohomology table…</p>
+</body>
+</html>
